@@ -53,4 +53,40 @@ public interface RedisController {
      */
     <T> boolean setIfNotExists(String key, T value);
 
+    /**
+     * Increase the key's value
+     *
+     * @param key key
+     * @param amt amount
+     * @return the value after increase
+     */
+    long increaseBy(String key, int amt);
+
+    /**
+     * Increase the key's value
+     *
+     * @param key          key
+     * @param defaultValue default value to use if not exists
+     * @param amt          amount
+     * @return the value after increase
+     */
+    long increaseBy(String key, int defaultValue, int amt);
+
+    /**
+     * Increment the key's value
+     *
+     * @param key key
+     * @return the value after incrementation
+     */
+    long increment(String key);
+
+    /**
+     * Increment the key's value
+     *
+     * @param key          key
+     * @param defaultValue default value to use if not exists
+     * @return the value after incrementation
+     */
+    long increment(String key, int defaultValue);
+
 }

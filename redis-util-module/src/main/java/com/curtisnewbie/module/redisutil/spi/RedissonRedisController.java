@@ -1,6 +1,7 @@
 package com.curtisnewbie.module.redisutil.spi;
 
 import com.curtisnewbie.module.redisutil.RedisController;
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,30 @@ public class RedissonRedisController implements RedisController {
     public <T> boolean setIfNotExists(String key, T value) {
         RBucket<Object> bucket = redissonClient.getBucket(key);
         return bucket.trySet(value);
+    }
+
+    @Override
+    public long increaseBy(String key, int amt) {
+        RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+        return atomicLong.addAndGet(amt);
+    }
+
+    @Override
+    public long increaseBy(String key, int defaultValue, int amt) {
+        setIfNotExists(key, defaultValue);
+        return increaseBy(key, amt);
+    }
+
+    @Override
+    public long increment(String key) {
+        RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+        return atomicLong.incrementAndGet();
+    }
+
+    @Override
+    public long increment(String key, int defaultValue) {
+        setIfNotExists(key, defaultValue);
+        return increment(key);
     }
 
 }
