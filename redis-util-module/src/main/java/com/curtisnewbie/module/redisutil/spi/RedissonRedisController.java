@@ -43,6 +43,13 @@ public class RedissonRedisController implements RedisController {
     }
 
     @Override
+    public <T> boolean expire(String key, T value, long ttl, TimeUnit unit) {
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        bucket.set(value);
+        return bucket.expire(ttl, unit);
+    }
+
+    @Override
     public <T> boolean setIfNotExists(String key, T value) {
         RBucket<Object> bucket = redissonClient.getBucket(key);
         return bucket.trySet(value);
@@ -70,6 +77,18 @@ public class RedissonRedisController implements RedisController {
     public long increment(String key, int defaultValue) {
         setIfNotExists(key, defaultValue);
         return increment(key);
+    }
+
+    @Override
+    public boolean exists(String key) {
+        RBucket<?> b = redissonClient.getBucket(key);
+        return b.isExists();
+    }
+
+    @Override
+    public boolean delete(String key) {
+        RBucket<?> b = redissonClient.getBucket(key);
+        return b.delete();
     }
 
 }

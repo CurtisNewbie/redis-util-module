@@ -45,6 +45,17 @@ public interface RedisController {
     boolean expire(String key, long ttl, TimeUnit unit);
 
     /**
+     * Set the value of the key, as well as the expiry time
+     *
+     * @param key   key
+     * @param value value
+     * @param ttl   time-to-live
+     * @param unit  time unit
+     * @return
+     */
+    <T> boolean expire(String key, T value, long ttl, TimeUnit unit);
+
+    /**
      * Set value for a key if not exists
      *
      * @param key   key
@@ -89,4 +100,17 @@ public interface RedisController {
      */
     long increment(String key, int defaultValue);
 
+    /**
+     * Check if the key exists
+     *
+     * @param key key
+     */
+    boolean exists(String key);
+
+    /**
+     * Delete key
+     *
+     * @param key key
+     */
+    boolean delete(String key);
 }
