@@ -1,5 +1,7 @@
 package com.curtisnewbie.module.redisutil;
 
+import com.curtisnewbie.module.redisutil.event.SubListener;
+
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -65,6 +67,17 @@ public interface RedisController {
     <T> boolean setIfNotExists(String key, T value);
 
     /**
+     * Set value for a key if not exists
+     *
+     * @param key   key
+     * @param value value
+     * @param ttl   time to live
+     * @param unit  time unit
+     * @return whether the key is set
+     */
+    <T> boolean setIfNotExists(String key, T value, long ttl, TimeUnit unit);
+
+    /**
      * Increase the key's value
      *
      * @param key key
@@ -120,4 +133,33 @@ public interface RedisController {
      * @param key key
      */
     boolean isLockHeldByCurrentThread(String key);
+
+    /**
+     * Try to lock
+     *
+     * @param key       key
+     * @param waitTime  wait time
+     * @param leaseTime lease time
+     * @param timeUnit  time unit
+     * @throws InterruptedException
+     */
+    boolean tryLock(String key, long waitTime, long leaseTime, TimeUnit timeUnit) throws InterruptedException;
+
+    /**
+     * Publish message
+     *
+     * @param channel key
+     * @param msg     message
+     */
+    <T> void publish(String channel, T msg);
+
+    /**
+     * Subscribe to a channel
+     *
+     * @param channel     channel
+     * @param subListener listener
+     * @param msgType     type of msg
+     */
+    <T> void subscribe(String channel, SubListener<T> subListener, Class<T> msgType);
+
 }

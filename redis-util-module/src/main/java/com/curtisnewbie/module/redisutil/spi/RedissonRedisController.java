@@ -1,10 +1,9 @@
 package com.curtisnewbie.module.redisutil.spi;
 
 import com.curtisnewbie.module.redisutil.RedisController;
-import org.redisson.api.RAtomicLong;
-import org.redisson.api.RBucket;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import com.curtisnewbie.module.redisutil.event.SubListener;
+import org.redisson.api.*;
+import org.redisson.api.listener.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.concurrent.TimeUnit;
@@ -58,6 +57,12 @@ public class RedissonRedisController implements RedisController {
     }
 
     @Override
+    public <T> boolean setIfNotExists(String key, T value, long ttl, TimeUnit unit) {
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        return bucket.trySet(value, ttl, unit);
+    }
+
+    @Override
     public long increaseBy(String key, int amt) {
         RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
         return atomicLong.addAndGet(amt);
@@ -97,6 +102,38 @@ public class RedissonRedisController implements RedisController {
     public boolean isLockHeldByCurrentThread(String key) {
         RLock l = redissonClient.getLock(key);
         return l.isHeldByCurrentThread();
+    }
+
+    @Override
+    public boolean tryLock(String key, long waitTime, long leaseTime, TimeUnit timeUnit) throws InterruptedException {
+        RLock l = redissonClient.getLock(key);
+        return l.tryLock(waitTime, leaseTime, timeUnit);
+    }
+
+    @Override
+    public <T> void publish(String channel, T msg) {
+        RTopic r = redissonClient.getTopic(channel);
+        r.publish(msg);
+    }
+
+    @Override
+    public <T> void subscribe(String channel, SubListener<T> subListener, Class<T> msgType) {
+        RTopic r = redissonClient.getTopic(channel);
+        r.addListener(msgType, new MessageListenerAdaptor<>(subListener));
+    }
+
+    private static class MessageListenerAdaptor<M> implements MessageListener<M> {
+
+        private final SubListener<M> sl;
+
+        private MessageListenerAdaptor(SubListener<M> sl) {
+            this.sl = sl;
+        }
+
+        @Override
+        public void onMessage(CharSequence channel, M msg) {
+            sl.onMessage(msg);
+        }
     }
 
 }
