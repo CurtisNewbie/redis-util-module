@@ -3,6 +3,7 @@ package com.curtisnewbie.module.redisutil.spi;
 import com.curtisnewbie.module.redisutil.RedisController;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RBucket;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,13 +22,14 @@ public class RedissonRedisController implements RedisController {
 
     @Override
     public <T> T get(String key) {
-        RBucket<Object> bucket = redissonClient.getBucket(key);
-        return (T) bucket.get();
+        RBucket<T> bucket = redissonClient.getBucket(key);
+        T o = bucket.get();
+        return o;
     }
 
     @Override
     public <T> void set(String key, T value) {
-        RBucket<Object> bucket = redissonClient.getBucket(key);
+        RBucket<T> bucket = redissonClient.getBucket(key);
         bucket.set(value);
     }
 
@@ -38,7 +40,7 @@ public class RedissonRedisController implements RedisController {
 
     @Override
     public boolean expire(String key, long ttl, TimeUnit unit) {
-        RBucket<Object> bucket = redissonClient.getBucket(key);
+        RBucket<?> bucket = redissonClient.getBucket(key);
         return bucket.expire(ttl, unit);
     }
 
@@ -51,7 +53,7 @@ public class RedissonRedisController implements RedisController {
 
     @Override
     public <T> boolean setIfNotExists(String key, T value) {
-        RBucket<Object> bucket = redissonClient.getBucket(key);
+        RBucket<T> bucket = redissonClient.getBucket(key);
         return bucket.trySet(value);
     }
 
@@ -89,6 +91,12 @@ public class RedissonRedisController implements RedisController {
     public boolean delete(String key) {
         RBucket<?> b = redissonClient.getBucket(key);
         return b.delete();
+    }
+
+    @Override
+    public boolean isLockHeldByCurrentThread(String key) {
+        RLock l = redissonClient.getLock(key);
+        return l.isHeldByCurrentThread();
     }
 
 }

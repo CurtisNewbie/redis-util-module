@@ -113,4 +113,11 @@ public interface RedisController {
      * @param key key
      */
     boolean delete(String key);
+
+    /**
+     * Is the lock currently held by current thread
+     *
+     * @param key key
+     */
+    boolean isLockHeldByCurrentThread(String key);
 }
