@@ -2,6 +2,7 @@ package com.curtisnewbie.module.redisutil;
 
 import com.curtisnewbie.module.redisutil.event.SubListener;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -176,4 +177,21 @@ public interface RedisController {
      * @param key key
      */
     void unlock(String key);
+
+    /**
+     * Push value into the list from the left
+     *
+     * @param key   key
+     * @param value value
+     */
+    <T> void listLeftPush(String key, T value);
+
+    /**
+     * Pop value from the list from the right
+     *
+     * @param key   key
+     * @param limit limit
+     */
+    <T> List<T> listRightPop(String key, int limit);
+
 }

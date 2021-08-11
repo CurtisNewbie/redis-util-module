@@ -6,6 +6,7 @@ import org.redisson.api.*;
 import org.redisson.api.listener.MessageListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -133,6 +134,18 @@ public class RedissonRedisController implements RedisController {
         RLock l = redissonClient.getLock(key);
         if (l.isHeldByCurrentThread())
             l.unlock();
+    }
+
+    @Override
+    public <T> void listLeftPush(String key, T value) {
+        RDeque<T> rd = redissonClient.getDeque(key);
+        rd.addFirst(value);
+    }
+
+    @Override
+    public <T> List<T> listRightPop(String key, int limit) {
+        RDeque<T> rd = redissonClient.getDeque(key);
+        return rd.pollLast(limit);
     }
 
     private static class MessageListenerAdaptor<M> implements MessageListener<M> {
