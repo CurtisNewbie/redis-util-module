@@ -111,6 +111,12 @@ public class RedissonRedisController implements RedisController {
     }
 
     @Override
+    public boolean tryLock(String key) throws InterruptedException {
+        RLock l = redissonClient.getLock(key);
+        return l.tryLock();
+    }
+
+    @Override
     public <T> void publish(String channel, T msg) {
         RTopic r = redissonClient.getTopic(channel);
         r.publish(msg);
@@ -120,6 +126,13 @@ public class RedissonRedisController implements RedisController {
     public <T> void subscribe(String channel, SubListener<T> subListener, Class<T> msgType) {
         RTopic r = redissonClient.getTopic(channel);
         r.addListener(msgType, new MessageListenerAdaptor<>(subListener));
+    }
+
+    @Override
+    public void unlock(String key) {
+        RLock l = redissonClient.getLock(key);
+        if (l.isHeldByCurrentThread())
+            l.unlock();
     }
 
     private static class MessageListenerAdaptor<M> implements MessageListener<M> {

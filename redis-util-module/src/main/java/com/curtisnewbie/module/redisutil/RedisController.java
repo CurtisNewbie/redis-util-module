@@ -146,6 +146,14 @@ public interface RedisController {
     boolean tryLock(String key, long waitTime, long leaseTime, TimeUnit timeUnit) throws InterruptedException;
 
     /**
+     * Try to lock
+     *
+     * @param key key
+     * @throws InterruptedException
+     */
+    boolean tryLock(String key) throws InterruptedException;
+
+    /**
      * Publish message
      *
      * @param channel key
@@ -162,4 +170,10 @@ public interface RedisController {
      */
     <T> void subscribe(String channel, SubListener<T> subListener, Class<T> msgType);
 
+    /**
+     * Unlock
+     *
+     * @param key key
+     */
+    void unlock(String key);
 }
