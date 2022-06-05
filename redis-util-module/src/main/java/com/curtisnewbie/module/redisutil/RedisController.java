@@ -5,6 +5,7 @@ import com.curtisnewbie.module.redisutil.event.SubListener;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Supplier;
 
 /**
  * Controller of Redis
@@ -193,5 +194,19 @@ public interface RedisController {
      * @param limit limit
      */
     <T> List<T> listRightPop(String key, int limit);
+
+    /**
+     * Load from cache
+     * <p>
+     * All operations are guarded by the lock
+     *
+     * @param <T>              value
+     * @param key              key
+     * @param supplyIfNotFound supply value if not found
+     * @param lockKey          key used to lock
+     * @param timeUnit         time unit for ttl
+     * @param ttl              time to live
+     */
+    <T> T loadFromCache(String key, Supplier<T> supplyIfNotFound, String lockKey, TimeUnit timeUnit, long ttl);
 
 }

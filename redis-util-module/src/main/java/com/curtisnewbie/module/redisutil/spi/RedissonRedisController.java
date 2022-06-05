@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Supplier;
 
 /**
  * Controller of redis using {@link org.redisson.api.RedissonClient}
@@ -146,6 +147,23 @@ public class RedissonRedisController implements RedisController {
     public <T> List<T> listRightPop(String key, int limit) {
         RDeque<T> rd = redissonClient.getDeque(key);
         return rd.pollLast(limit);
+    }
+
+    @Override
+    public <T> T loadFromCache(String key, Supplier<T> supplyIfNotFound, String lockKey, TimeUnit timeUnit, long ttl) {
+        final Lock lock = getLock(lockKey);
+        lock.lock();
+        try {
+            final RBucket<T> bucket = redissonClient.getBucket(key);
+            T t = bucket.get();
+            if (t == null) {
+                t = supplyIfNotFound.get();
+                bucket.set(t, ttl, timeUnit); // if t is still null, redisson will delete it
+            }
+            return t;
+        } finally {
+            lock.unlock();
+        }
     }
 
     private static class MessageListenerAdaptor<M> implements MessageListener<M> {
